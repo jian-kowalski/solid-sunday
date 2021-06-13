@@ -1,20 +1,22 @@
 package br.com.solid.rh.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.List;
 
-import br.com.solid.rh.exception.ValidacaoException;
 import br.com.solid.rh.model.Funcionario;
 
 public class ReajusteService {
 
+    private List<ValidacacaoReajusteSalarial> validacoes;
+    
+    public ReajusteService(List<ValidacacaoReajusteSalarial> validacoes) {
+        this.validacoes = validacoes;
+    }
+
     public void reajustarSalarioDoFuncionario(Funcionario funcionario, BigDecimal valorAumento){
-        var salarioAtual = funcionario.getSalario();
-        var percentualReajuste = valorAumento.divide(salarioAtual, RoundingMode.HALF_UP);
-		if (percentualReajuste.compareTo(new BigDecimal("0.4")) > 0) {
-			throw new ValidacaoException("Reajuste nao pode ser superior a 40% do salario!");
-		}
-        var salarioReajustado = salarioAtual.add(valorAumento);
+        this.validacoes.forEach(validacao -> validacao.validar(funcionario, valorAumento));
+
+        var salarioReajustado = funcionario.getSalario().add(valorAumento);
 		funcionario.atualizarSalario(salarioReajustado);
 
     }
